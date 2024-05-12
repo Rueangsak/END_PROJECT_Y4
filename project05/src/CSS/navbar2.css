@@ -1,0 +1,50 @@
+.navbar2-container {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  position: relative;
+  align-items: flex-start;
+  flex-direction: column;
+}
+.navbar2-navbar {
+  height: 80px;
+  position: relative;
+  border-bottom: 2px solid rgba(120, 120, 120, 0.4);
+}
+.navbar2-max-width {
+  width: 100%;
+  max-width: auto;
+  min-width: auto;
+  padding-left: var(--dl-space-space-oneandhalfunits);
+  padding-right: var(--dl-space-space-threeunits);
+}
+.navbar2-text {
+  font-size: 24px;
+  font-style: normal;
+  font-family: Urbanist;
+  font-weight: 800;
+  line-height: 1.2;
+  padding-right: 75%;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.navbar2-button {
+  color: var(--dl-color-scheme-white);
+  padding-top: 6px;
+  border-color: #99cec2;
+  border-radius: var(--dl-radius-radius-radius8);
+  padding-bottom: 6px;
+  background-color: #99cec2;
+}
+.navbar2-button1 {
+  color: var(--dl-color-scheme-white);
+  display: flex;
+  padding-top: 6px;
+  border-color: #99cec2;
+  padding-left: var(--dl-space-space-unit);
+  border-radius: var(--dl-radius-radius-radius8);
+  padding-right: var(--dl-space-space-unit);
+  padding-bottom: 6px;
+  background-color: #99cec2;
+}

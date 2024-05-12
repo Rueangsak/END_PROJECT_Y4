@@ -1,0 +1,17 @@
+.row{ 
+    display: flex;  
+    align-content: center;
+    text-align: center;
+    flex-wrap: wrap;
+    width: 100%;
+    flex-direction: column;
+    padding-top: 30px;
+  }
+.head{
+    display: flex;  
+    align-content: center;
+    text-align: center;
+    flex-wrap: wrap;
+    width: 100%;
+    flex-direction: column;
+  }
