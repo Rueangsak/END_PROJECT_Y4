@@ -1,34 +1,113 @@
-# React JS Landing Page Template
+# project05 - Presenter/Creator App
 
-**
+`project05` is the teacher/presenter side of the interactive classroom system in this repository.
+It is responsible for account login, creating presentation forms, editing question slides, generating participant QR links, and controlling live session data stored in Firebase.
 
-# 🛎️🛎️ Good news! New & improved [V2](https://github.com/issaafalkattan/react-landing-page-template-2021) is out  
+## What This App Does
 
-**
+- Authenticate users (login/signup/logout).
+- Create and manage `Form` documents in Firestore.
+- Build slide-based questions with multiple interaction types.
+- Save updates to slide content (`filter`) back to Firestore.
+- Open presentation view and result view for a selected form.
+- Generate QR code that points participants to the `user05` app route: `.../User/:docId`.
+- Clear submitted answers for a form session when needed.
 
+## Main Routes
 
-### <a href="https://react-landing-page-template.herokuapp.com">LIVE DEMO</a> 
+Defined in `src/App.jsx`:
 
-## Description
-This is a ReactJS based landing page template, fit for a startup company/service with a one page view. The design is inspired by a template from <a href="https://www.free-css.com/assets/files/free-css-templates/preview/page234/interact/">Free-CSS.com </a>
-All 'visual' data can be easily modified by changing the data.json file.
+- `/` - landing/main page
+- `/Login` - login page
+- `/SignUp` - registration page
+- `/Logout` - logout action/page
+- `/Work` - authenticated workspace for form list and management
+- `/Open/:docId` - editor + presenter page for a selected form
+- `/Show/:docId` - read-only style display page for selected form
 
-## Make it Yours!
-### 1. Preps
-You will need to have <a href="https://nodejs.org/">Node JS</a> installed on your pc. 
+## Slide Types
 
-### 2. Clone Files
-After cloning the files, you will have to run ```yarn``` followed by ```yarn start``` in the CLI
-### 3. Add your own data 
-Change the data in the ```data.json``` file as well as add any images to ```public/img/```
-You can also change styles by modifying the ```public/css``` files.
+When creating slides from `New Slide`, the app stores each slide as an object in `filter[]` with `featuresWork`:
 
+- `rank` - ranking/poll style
+- `open` - open-ended answer
+- `word` - word cloud style answer aggregation
+- `multiple` - multiple choice with per-option `status` (correct/incorrect)
+- `QRcode` - supported in parts of display flow
 
-## Like this project?
-<a href="https://www.buymeacoffee.com/issaaf">Buy my a coffee ☕️</a>
+## Firestore Data Model
 
-## Credits
-##### Free CSS 
-<a href="https://www.free-css.com/assets/files/free-css-templates/preview/page234/interact/">Free-CSS.com </a>
+Firebase project: `teaching-project-a8687`
 
-##### Issaaf kattan
+- Collection: `Form`
+  - Document fields:
+    - `uid` (owner user id)
+    - `nameWork` (form/session title)
+    - `filter` (array of slide definitions)
+  - Subcollection: `answers`
+    - `answer` (string)
+    - `user` (participant identifier)
+    - `index` (slide index in `filter`)
+    - `status` (optional boolean, used by multiple-choice logic)
+
+## Key Files
+
+- `src/App.jsx` - route setup
+- `src/pages/Work.jsx` - authenticated workspace page
+- `src/c-createfile/AddForm.jsx` - create/edit/delete form records
+- `src/pages/Open.jsx` - main presenter editor (save, QR, clear answers)
+- `src/c-presen/newslide.jsx` - add slide types
+- `src/c-presen/content.jsx` - edit selected slide content
+- `src/firebase/serviceApi.js` - Firestore access layer for forms
+- `src/firebase/firebase.js` - Firebase initialization
+
+## Local Development
+
+### Prerequisites
+
+- Node.js 18+ recommended
+- npm (comes with Node.js)
+
+### Install
+
+```bash
+cd project05
+npm install
+```
+
+### Start
+
+```bash
+npm run dev
+```
+
+Default Vite port is `3001` (configured in `vite.config.mjs`).
+
+## Build
+
+```bash
+npm run build
+```
+
+## Firebase Hosting
+
+Files:
+
+- `.firebaserc` -> default project `teaching-project-a8687`
+- `firebase.json` -> hosting `public: dist`, SPA rewrite to `index.html`
+
+Deploy:
+
+```bash
+npm run build
+firebase deploy --only hosting
+```
+
+## How It Connects To `user05`
+
+`project05` creates and manages forms, then generates participant access through a QR code URL:
+
+- `https://teaching-project-a8687.web.app/User/:docId`
+
+That URL is handled by `user05`, where participants submit answers.
+Both apps read/write the same Firestore project and cooperate through the shared `Form` + `answers` schema.
