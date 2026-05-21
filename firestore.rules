@@ -1,0 +1,29 @@
+rules_version = '2';
+/**
+ * Teaching tools — adjust before production.
+ * - Presenters: authenticated owners can create/update/delete their Form docs.
+ * - Participants: can read sessions and create answers (join without login).
+ * Deploy: firebase deploy --only firestore:rules
+ */
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /Form/{formId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+
+      match /answers/{answerId} {
+        allow read: if true;
+        allow create: if request.resource.data.keys().hasAll(['answer', 'user', 'index']);
+        allow update, delete: if request.auth != null
+          && get(/databases/$(database)/documents/Form/$(formId)).data.uid == request.auth.uid;
+      }
+    }
+
+    match /email/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
