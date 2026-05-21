@@ -10,7 +10,7 @@ const DashBoard = () => {
     const { currentUser } = useContext(AuthContext);
 
     if (!currentUser) {
-        return <Navigate to="/login" />;
+        return <Navigate to="/login" replace />;
     }
 
     return (

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import {auth} from '../firebase/firebase'
-import { onAuthStateChanged } from "firebase/auth";
+import React, { useEffect, useMemo, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { AppLoader } from '../design-system';
+import { auth } from '../firebase/firebase';
 
 
 //เอาไว้ตรวจว่า user มีการ Onsensation หรือไม่
@@ -11,19 +12,22 @@ export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
-        onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
             setCurrentUser(user);
             setLoading(false);
-        })
-    }, [])
+        });
+        return unsubscribe;
+    }, []);
+
+    const value = useMemo(() => ({ currentUser }), [currentUser]);
 
     if (loading) {
-        return <p>Loading...</p>;
+        return <AppLoader message="Loading account..." fullScreen />;
     }
 
     return (
-        <AuthContext.Provider value={{currentUser}}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
-    )
+    );
 }

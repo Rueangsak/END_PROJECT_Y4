@@ -61,6 +61,24 @@ Firebase project: `teaching-project-a8687`
 - `src/firebase/serviceApi.js` - Firestore access layer for forms
 - `src/firebase/firebase.js` - Firebase initialization
 
+## Environment
+
+Copy `.env.example` to `.env.local` and set the deployed participant app URL:
+
+```bash
+VITE_PARTICIPANT_URL=https://your-user05-host.web.app/User/
+```
+
+Used for QR codes in `Open.jsx` (`src/config/urls.js`).
+
+## Firestore Security Rules
+
+Rules live at repo root: `firestore.rules`. Deploy after review:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
 ## Local Development
 
 ### Prerequisites
@@ -107,7 +125,7 @@ firebase deploy --only hosting
 
 `project05` creates and manages forms, then generates participant access through a QR code URL:
 
-- `https://teaching-project-a8687.web.app/User/:docId`
+- Configured via `VITE_PARTICIPANT_URL` (default: `https://teaching-project-a8687.web.app/User/:docId`)
 
 That URL is handled by `user05`, where participants submit answers.
 Both apps read/write the same Firestore project and cooperate through the shared `Form` + `answers` schema.

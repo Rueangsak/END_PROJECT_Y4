@@ -1,40 +1,13 @@
-import Presentation from '../c-createfile/presentation'
-import Navbar1 from '../c-createfile/navbar1'
-import '../CSS/work.css'
-import { useState, useEffect,useContext } from "react";
-import { AuthContext } from "../login/Auth";
-import JsonData from "../c-main/data/data.json";
-import { Navigate } from "react-router-dom";
+import Presentation from '../c-createfile/presentation';
+import { DashboardLayout } from '../layout';
 
-
-
-
-
-const Work = () => {
-  const { currentUser } = useContext(AuthContext);
-
-  const [landingPageData, setLandingPageData] = useState({});
-
-  useEffect(() => {
-    setLandingPageData(JsonData);
-  }, []);
-  
-  if (!currentUser) {
-    return <Navigate to="/login" />;
-  }
- 
-  return (
-    <div> 
-      <Navbar1 rootClassName="navbar1-root-class-name"></Navbar1>
-      <Presentation></Presentation>
-    </div>
-  );
-
-
-};
-
-
-
-
+const Work = () => (
+  <DashboardLayout
+    title="Presentations"
+    subtitle="Create sessions, open the editor, and share QR codes with your class."
+  >
+    <Presentation />
+  </DashboardLayout>
+);
 
 export default Work;

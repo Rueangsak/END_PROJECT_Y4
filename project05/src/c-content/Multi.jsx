@@ -1,94 +1,106 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import Stack from '@mui/material/Stack';
+import { AppButton, AppInput, AppSection } from '../design-system';
+import { layoutSpacing } from '../design-system/tokens/spacing';
 
 export default function Multi(props) {
-  
+  const updateFilter = (updater) => {
+    const next = props.filter.map((slide, i) =>
+      i === props.indexFilterShow ? updater({ ...slide }) : slide
+    );
+    props.setFilter(next);
+  };
 
-  //เปลี่ยนคำถาม
-  const changeQuestion=(text)=>{
-    let newFileter = props.filter
-    newFileter[props.indexFilterShow].question = text
-    props.setFilter([...newFileter])
-  }
+  const changeQuestion = (text) => {
+    updateFilter((slide) => {
+      slide.question = text;
+      return slide;
+    });
+  };
 
+  const changeStatus = (indexNewStatus) => {
+    updateFilter((slide) => {
+      if (slide.ans[indexNewStatus]?.status) return slide;
+      slide.ans = slide.ans.map((item, index) => ({
+        ...item,
+        status: index === indexNewStatus,
+      }));
+      return slide;
+    });
+  };
 
-  //เปลี่ยนสถานะของคำตอบ
-  const changeStatus=(indexNewStatus)=>{
-    let newFileter = props.filter
-    if(newFileter[props.indexFilterShow].ans[indexNewStatus].status)
-      return
-    newFileter[props.indexFilterShow].ans.forEach((data,index)=>{
-      if(index === indexNewStatus){
-        data.status = true
-      }else{
-        data.status = false
-      }
-    })
-    
-    props.setFilter([...newFileter])
-  }
+  const changeTextAns = (newText, index) => {
+    updateFilter((slide) => {
+      slide.ans = slide.ans.map((item, i) => (i === index ? { ...item, text: newText } : item));
+      return slide;
+    });
+  };
 
-  //เปลี่ยนข้อความของคำตอบ
-  const changeTextAns=(newText,index)=>{
-    let newFileter = props.filter
-    newFileter[props.indexFilterShow].ans[index].text = newText
-    props.setFilter([...newFileter])
-  }
+  const addAns = () => {
+    updateFilter((slide) => {
+      slide.ans = [...slide.ans, { text: '', status: slide.ans.length === 0 }];
+      return slide;
+    });
+  };
 
+  const deleteAns = (oldIndex) => {
+    updateFilter((slide) => {
+      slide.ans = slide.ans.filter((_, index) => index !== oldIndex);
+      return slide;
+    });
+  };
 
-  //เพิ่มคำตอบ
-  const addAns=()=>{
-    let newFileter = props.filter
-    newFileter[props.indexFilterShow].ans.push(
-      {
-        text:"",
-        status:props.filter[props.indexFilterShow].ans.length===0
-      }
-    )
-    props.setFilter([...newFileter])
-  }
+  const answers = props.filter[props.indexFilterShow]?.ans ?? [];
 
-
-  //ลบคำตอบ
-  const deleteAns=(oldIndex)=>{
-    let newFileter = props.filter
-    newFileter[props.indexFilterShow].ans = newFileter[props.indexFilterShow].ans.filter((value, index)=>index!==oldIndex) 
-    props.setFilter([...newFileter])
-  }
-
-
-  
   return (
-    <div><p style={{padding:10 }}>Multiple choice</p>
-      <button style={{padding:10,backgroundColor:"red",marginLeft:20,marginBottom:20,color:"white"}} onClick={()=>props.deteleFilter(props.indexFilterShow)}>Delete</button>
-      <Box
-        component="form"
-        sx={{'& > :not(style)': { m: 1, width: '40ch' },}}
-        noValidate
-        autoComplete="off"
+    <AppSection title="Multiple choice">
+      <AppButton color="error" variant="contained" onClick={() => props.deteleFilter(props.indexFilterShow)}>
+        Delete slide
+      </AppButton>
+      <AppInput
+        label="Your question"
+        value={props.filter[props.indexFilterShow].question}
+        onChange={(e) => changeQuestion(e.target.value)}
+      />
+      <AppButton variant="outlined" onClick={addAns}>
+        Add option
+      </AppButton>
+      <RadioGroup
+        name="multi-correct"
+        aria-label="Mark the correct answer"
+        value={String(answers.findIndex((a) => a.status))}
+        onChange={(e) => changeStatus(Number(e.target.value))}
       >
-        <TextField id="outlined-basic" label="Your question" variant="outlined" value={props.filter[props.indexFilterShow].question} onChange={(e)=>changeQuestion(e.target.value)}/>
-      </Box>
-      <button style={{paddingRight:50,marginLeft:20,marginTop:20}} onClick={()=>addAns()}>Add Item</button>
-      
-      {props.filter[props.indexFilterShow].ans.map((data,index)=>{
-          return(
-            <div key={index}>
-              <TextField label="Item"  value={data.text} style={{padding:10,marginTop:20}} onChange={(e)=>changeTextAns(e.target.value,index)} />
-              <input type="radio"  name="status" checked={data.status} onClick={()=>changeStatus(index)} />
-              <button style={{marginTop:18}} onClick={()=>deleteAns(index)}>x</button>
-            </div>
-          )
-        }
-      )}
-
-
-  
-    </div>
-        
-      
+        <Stack spacing={layoutSpacing.form}>
+          {answers.map((data, index) => (
+            <Stack key={index} direction="row" spacing={1} alignItems="center">
+              <FormControlLabel
+                value={String(index)}
+                control={<Radio />}
+                label={`Correct · option ${index + 1}`}
+                sx={{ m: 0, minWidth: { xs: '100%', sm: 160 } }}
+              />
+              <AppInput
+                label={`Option ${index + 1}`}
+                value={data.text}
+                onChange={(e) => changeTextAns(e.target.value, index)}
+                sx={{ flex: 1 }}
+              />
+              <AppButton
+                size="small"
+                variant="outlined"
+                color="error"
+                onClick={() => deleteAns(index)}
+                aria-label={`Remove option ${index + 1}`}
+              >
+                Remove
+              </AppButton>
+            </Stack>
+          ))}
+        </Stack>
+      </RadioGroup>
+    </AppSection>
   );
 }
-

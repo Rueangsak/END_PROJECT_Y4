@@ -1,78 +1,63 @@
-import React,{useState} from 'react'
-// import PropTypes from 'prop-types'
+import React, { useState } from 'react';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import { AppButton } from '../design-system';
 
-import '../CSS/newslide.css'
+const slideTypes = [
+  { label: 'Ranking', featuresWork: 'rank' },
+  { label: 'Open-ended', featuresWork: 'open' },
+  { label: 'Word cloud', featuresWork: 'word' },
+  { label: 'Multiple choice', featuresWork: 'multiple' },
+];
 
-import Button from '@mui/material/Button';
 const Newslide = (props) => {
+  const [showData, setShowData] = useState(false);
 
-
-  //const [imgData,setImgData] = useState([{name:"rank",items:[],tit:"",url:"../../img/rank.jpg"},{name:"open",items:[],tit:"",url:"../../img/open.jpg"},{name:"word",items:[],tit:"",url:"../../img/word.jpg"},{name:"multi",items:[],tit:"",url:"../../img/multi.jpg"}])
-  const [showData,setShowData] = useState(false)
-
-
+  const addSlide = (featuresWork) => {
+    props.addfilter({
+      featuresWork,
+      question: '',
+      ans: [],
+    });
+    setShowData(false);
+  };
 
   return (
-    <div className="newslide-container">
-      <div className="newslide1">
+    <Box
+      sx={{
+        width: '100%',
+        borderBottom: 2,
+        borderColor: 'error.light',
+        py: { xs: 1, md: 1.5 },
+        px: { xs: 2, md: 3 },
+      }}
+    >
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ xs: 'stretch', sm: 'center' }}>
+        <AppButton
+          variant="contained"
+          onClick={() => setShowData(!showData)}
+          aria-expanded={showData}
+          sx={{ alignSelf: { xs: 'stretch', sm: 'flex-start' } }}
+        >
+          New slide
+        </AppButton>
+        {showData && (
+          <Stack direction="row" spacing={1} flexWrap="wrap" role="group" aria-label="Slide types">
+            {slideTypes.map((type) => (
+              <AppButton
+                key={type.featuresWork}
+                size="small"
+                variant="outlined"
+                onClick={() => addSlide(type.featuresWork)}
+              >
+                {type.label}
+              </AppButton>
+            ))}
+          </Stack>
+        )}
+      </Stack>
+    </Box>
+  );
+};
 
-        <Button variant="contained" class="button-88" onClick={()=>setShowData(!showData)}>New Slide</Button>
-        {showData? 
-        
-
-        <div>
-          <img src={"../../img/rank.jpg"} style={{width:80,height:40,paddingRight:5,paddingLeft:5,paddingTop:2}} 
-              onClick={()=>props.addfilter(
-                {
-                  featuresWork: "rank" ,   
-                  question:"",
-                  ans:[]
-                }
-              )}
-          />
-          <img src={"../../img/open.jpg"} style={{width:80,height:40,paddingRight:5,paddingLeft:5,paddingTop:2}} 
-              onClick={()=>props.addfilter(
-                {
-                  featuresWork: "open" ,   
-                  question:"",
-                  ans:[]
-                }
-              )}
-          />
-          <img src={"../../img/word.jpg"} style={{width:80,height:40,paddingRight:5,paddingLeft:5,paddingTop:2}} 
-              onClick={()=>props.addfilter(
-                {
-                  featuresWork: "word" ,   
-                  question:"",
-                  ans:[]
-                  
-                }
-              )}
-          />
-          <img src={"../../img/multi.jpg"} style={{width:80,height:40,paddingRight:5,paddingLeft:5,paddingTop:2}} 
-              onClick={()=>props.addfilter(
-                {
-                  featuresWork: "multiple" ,   
-                  question:"",
-                  ans:[]
-                }
-              )}
-          />
-                    {/* <img src={"../../img/qr-code-scan.png"} style={{width:35,height:35,paddingRight:5,paddingLeft:5,paddingTop:2}} 
-              onClick={()=>props.addfilter(
-                {
-                  featuresWork: "QRcode" ,   
-                  srcQRcode:"", 
-                }
-              )}
-          /> */}
-        </div>
-        :
-        <></>}
-      </div>
-    </div>
-  )
-}
-
-
-export default Newslide
+export default Newslide;
