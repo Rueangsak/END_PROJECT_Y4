@@ -1,70 +1,111 @@
-# Getting Started with Create React App
+# user05 - Participant/Live Display App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+`user05` is the participant-facing and live-display side of the interactive classroom system.
+It consumes form data created in `project05`, allows users to answer questions via `docId`, and renders real-time aggregated results.
 
-## Available Scripts
+## What This App Does
 
-In the project directory, you can run:
+- Accept participant access through `/User/:docId`.
+- Ask for participant identifier (name/student code) before answering.
+- Serve question flow by slide type (`rank`, `open`, `word`, `multiple`).
+- Submit answers to Firestore subcollection `answers`.
+- Display live results on `/Open/:docId`.
+- Legacy share routes (`/OpenendShow`, etc.) load a single slide via `ShowSlidePage` + live Firestore data.
 
-### `npm start`
+## Main Routes
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Defined in `src/App.jsx`:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- `User/:docId` - participant answering flow
+- `Open/:docId` - live presentation/result page
+- `/OpenendShow/:docId/:index` - open-ended result view
+- `/RankingShow/:docId/:index` - ranking result view
+- `/WordcloudShow/:docId/:index` - word cloud result view
+- `/MultipleShow/:docId/:index` - multiple-choice result view
 
-### `npm test`
+## Runtime Flow
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Presenter creates/edits a form in `project05`.
+2. Presenter shares QR/link with `docId`.
+3. Participant opens `user05/User/:docId`.
+4. Participant submits answers slide-by-slide.
+5. Answers are stored in `Form/{docId}/answers`.
+6. `user05/Open/:docId` listens to Firestore snapshots and updates results live.
 
-### `npm run build`
+## Firestore Data Model (Shared)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Firebase project: `teaching-project-a8687`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Collection: `Form`
+  - `filter[]` contains slide definitions and question content
+- Subcollection: `answers`
+  - `answer`
+  - `user`
+  - `index` (current slide index)
+  - `status` (used by multiple-choice mode)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Key Files
 
-### `npm run eject`
+- `src/App.js` - route registration
+- `src/function/User.js` - participant question flow + answer submission
+- `src/pages/Open.jsx` - live presenter/observer display page
+- `src/pages/bigpaper.jsx` - mode-aware rendering container
+- `src/Features/*.js` - participant answer components by type
+- `src/show/*.js` - result display components by type
+- `src/firebase/serviceApi.js` - Firestore API helpers
+- `src/firebase/firebase.js` - Firebase initialization
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Firestore Security Rules
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Shared with `project05` — see `../firestore.rules` and deploy:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+firebase deploy --only firestore:rules
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Local Development
 
-## Learn More
+### Prerequisites
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Node.js 18+ recommended
+- npm
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Install
 
-### Code Splitting
+```bash
+cd user05
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Start
 
-### Analyzing the Bundle Size
+```bash
+npm run dev
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Default Vite port is `3002` (configured in `vite.config.mjs`).
 
-### Making a Progressive Web App
+## Build
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```bash
+npm run build
+```
 
-### Advanced Configuration
+## Firebase Hosting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Files:
 
-### Deployment
+- `.firebaserc` -> default project `teaching-project-a8687`
+- `firebase.json` -> hosting from `dist` with SPA rewrite
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Deploy:
 
-### `npm run build` fails to minify
+```bash
+npm run build
+firebase deploy --only hosting
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Notes
+
+- This app intentionally does not include full teacher-side form authoring (`Newslide`, management dashboard, auth workflow). Those belong to `project05`.
+- Both applications share one backend, so schema consistency between slide `filter` and `answers` is critical.

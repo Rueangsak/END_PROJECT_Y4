@@ -1,84 +1,53 @@
-import { db } from "./firebase";
+import { db } from './firebase';
+import { addDoc, collection, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 
-const addFormToDB=(uid,nameWork)=>{
-    db.collection("Form").add({
-        uid:uid,
-        nameWork:nameWork,
-        filter:[
-            // {
-            //     featuresWork: "multiple" ,
-            //     question:"what2",
-            //     ans:[
-            //         {
-            //             text:"fine",
-            //             status:true
-            //         },
-            //         {
-            //             text:"good",
-            //             status:false
-            //         }
-            //     ]
-            // }
-        ]
-    })
-    .then(() => {
-        console.log("Document successfully written!");
-    })
+const addFormToDB = (uid, nameWork, onSuccess, onError) => {
+  addDoc(collection(db, 'Form'), { uid, nameWork, filter: [] })
+    .then(() => onSuccess?.())
     .catch((error) => {
-        console.error("Error writing document: ", error);
+      console.error('Error writing document: ', error);
+      onError?.(error);
     });
-}
-
-const getForm= (success)=>{
-    db.collection("Form")
-        .onSnapshot((querySnapshot) => {
-        let forms = [];
-        querySnapshot.forEach((doc) => {
-            forms.push({...doc.data(),id:doc.id});
-        });
-        success( forms)
-    });
-}
-
-
-const getPaper = (docid,getSuccess)=>{
-    let docRef = db.collection("Form").doc(docid);
-
-    docRef.get().then((docid) => {
-        if (docid.exists) {
-            console.log("Document data:", docid.data());
-            getSuccess(docid.data())
-        } else {
-            console.log("No such document!");
-        }
-    }).catch((error) => {
-        console.log("Error getting document:", error);
-    });
-    
-    }
-
-
-
-
-const updatePaper = (docid,filter,saveSuccess) => {
-    
-        db.collection('Form').doc(docid).update({ 
-            filter: filter 
-        })
-        .then(() => {
-            console.log("Document successfully updated!");
-            saveSuccess()
-        })
-        .catch((error) => {
-            // The document probably doesn't exist.
-            console.error("Error updating document: ", error);
-        });
-
 };
 
+const getForm = (success, onError) => {
+  return onSnapshot(
+    collection(db, 'Form'),
+    (querySnapshot) => {
+      const forms = [];
+      querySnapshot.forEach((snap) => forms.push({ ...snap.data(), id: snap.id }));
+      success(forms);
+    },
+    (error) => {
+      console.error('Error loading forms: ', error);
+      onError?.(error);
+    }
+  );
+};
 
+const getPaper = (docid, getSuccess, getError) => {
+  const docRef = doc(db, 'Form', docid);
+  getDoc(docRef)
+    .then((docSnap) => {
+      if (docSnap.exists()) {
+        getSuccess(docSnap.data());
+      } else {
+        getError?.(new Error('Presentation not found'));
+      }
+    })
+    .catch((error) => {
+      console.error('Error getting document:', error);
+      getError?.(error);
+    });
+};
 
-                   
+const updatePaper = (docid, filter, saveSuccess, saveError) => {
+  updateDoc(doc(db, 'Form', docid), { filter })
+    .then(() => saveSuccess?.())
+    .catch((error) => {
+      console.error('Error updating document: ', error);
+      saveError?.(error);
+    });
+};
 
-
-export default {addFormToDB,getForm,getPaper,updatePaper}
+export default { addFormToDB, getForm, getPaper, updatePaper };

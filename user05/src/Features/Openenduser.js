@@ -1,78 +1,78 @@
-import * as React from 'react';
-import "firebase/firestore";
-import FormLabel from '@mui/material/FormLabel';
-import Box from '@mui/material/Box';
-import '../CSS/style.css';
+import { useState } from 'react';
+import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
-import { db } from "../firebase/firebase";
-import { useParams } from 'react-router-dom';
-import {Button,TextField} from '@mui/material';
-import { useState,useEffect } from 'react';
-
+import { db } from '../firebase/firebase';
+import { addDoc, collection, doc } from 'firebase/firestore';
+import { AppButton, AppInput } from '../design-system';
+import { ParticipantQuestion } from '../layout';
 
 export default function Openenduser(props) {
+  const [answer, setAnswer] = useState('');
+  const [check, setCheck] = useState(true);
+  const docRef = doc(db, 'Form', props.docId);
+  const step = props.step ?? props.indexFilterShow + 1;
+  const total = props.totalSlides ?? 1;
 
-    const [answer,setAnswer] = useState('')
-    const [name,setName] = useState([])
-    const [loading,setLoading] = useState(true)
-    const {docId,index} = useParams()
-    const [check,setCheck] = useState(true)
-    let docRef = db.collection("Form").doc(props.docId); 
+  const handleAddAnswer = () => {
+    if (!answer.trim()) return;
+    addDoc(collection(docRef, 'answers'), {
+      answer: answer.trim(),
+      user: props.user,
+      index: props.indexFilterShow,
+    })
+      .then(() => {
+        setCheck(false);
+        setAnswer('');
+      })
+      .catch((error) => console.error('Error adding answer: ', error));
+  };
 
-    const handleAddAnswer = () => {
-        docRef.collection('answers').add({
-            answer: answer, 
-            user : props.user,
-            index : props.indexFilterShow
-        })
-        .then(() => {
-            alert("Answer successfully added!");
-            setCheck (false)
-            console.log("Answer successfully added!");
-            setAnswer('');
-        })
-        .catch((error) => {
-            console.error("Error adding answer: ", error);
-        });
-    };
-    useEffect (()=>{
-        console.log("answerUser",props.answerUser);
-    },[])
+  const responses = props.answerUser.filter((data) => data.index === props.indexFilterShow);
 
-
- if (check){
-
+  if (check) {
     return (
-        <div class="head" style={{padding:40}}>
-            <FormLabel style={{color:"black",fontFamily:"sans-serif",fontSize:34}} component="legend">{props.data.question}</FormLabel> 
-            <br/>
-            <div>
-                <Box></Box>
-                <div>
-                    <TextField id="filled-basic" label="Answer please" variant="filled" value={answer} onChange={(e) => setAnswer(e.target.value)} />
-                    <div>
-                    <Button  style={{marginTop:20}} variant="contained" onClick={handleAddAnswer}>Send</Button>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <ParticipantQuestion
+        question={props.data.question}
+        step={step}
+        totalSteps={total}
+        primaryLabel="Submit"
+        onPrimary={handleAddAnswer}
+        primaryDisabled={!answer.trim()}
+      >
+        <AppInput
+          label="Your answer"
+          value={answer}
+          onChange={(e) => setAnswer(e.target.value)}
+          multiline
+          minRows={3}
+        />
+      </ParticipantQuestion>
     );
+  }
+
+  return (
+    <ParticipantQuestion
+      question={props.data.question}
+      step={step}
+      totalSteps={total}
+      primaryAction={
+        <AppButton
+          variant="contained"
+          fullWidth
+          onClick={() => {
+            props.setIndexFilterShow(props.indexFilterShow + 1);
+            setCheck(true);
+          }}
+        >
+          Next question
+        </AppButton>
+      }
+    >
+      <Stack spacing={1}>
+        {responses.map((data, i) => (
+          <Chip key={i} label={`${data.user}: ${data.answer}`} variant="outlined" sx={{ height: 'auto', py: 1 }} />
+        ))}
+      </Stack>
+    </ParticipantQuestion>
+  );
 }
-
-return(
-    <div class="row">
-            {props.answerUser.filter((data)=>data.index == props.indexFilterShow).map((data) => {   
-                return (
-                    <div style={{padding:8}}>
-                    <Chip label={data.user+" "+" "+" "+"Answer :"+" "+data.answer}  style={{fontSize:18,padding:10}}/>
-                    </div>
-                )
-            })} 
-       
-        <Button  style={{marginTop:30}} variant="contained" onClick={() => [props.setIndexFilterShow(props.indexFilterShow+1),setCheck(true)]}>Send</Button>
-    </div>
-)
-
-}
-
-

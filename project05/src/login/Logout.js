@@ -1,21 +1,22 @@
-import React from "react";
-import firebase from "firebase";
-import Main from "../pages/Main";
+import { useEffect } from 'react';
+import { signOut } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import { AppLoader } from '../design-system';
+import { auth } from '../firebase/firebase';
 
 const Logout = () => {
+  const navigate = useNavigate();
 
-        firebase.auth().signOut().then(() =>{
-        this.setState({
-         user:null
-        })
-        this.props.history.push("/");
-        }).catch(function(error) {
-        // An error happened.
-        });
-        return (
-            <Main/>
-           )
+  useEffect(() => {
+    signOut(auth)
+      .then(() => navigate('/login', { replace: true }))
+      .catch((error) => {
+        console.error(error);
+        navigate('/login', { replace: true });
+      });
+  }, [navigate]);
 
-       }
+  return <AppLoader message="Signing out..." fullScreen />;
+};
 
 export default Logout;

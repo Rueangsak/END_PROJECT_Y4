@@ -1,24 +1,14 @@
-import { red } from '@mui/material/colors'
-import React from 'react'
-
-import '../CSS/paperpre.css'
+import React from 'react';
+import { SlideSidebar } from '../layout';
 
 const Paperpre = (props) => {
   return (
-    <div className="paperpre-container">
-      <div className ="paperpre-container1">
-          <div className="row">
-            {props.filter.map((data,index)=>{
-              return(
-                <div className ="paperpre-container2" style={{marginBottom:5,marginTop:10}} key={index} onClick={()=>props.setIndexFilterShow(index)}>
-                  <h1 class='btnpre'>{data.featuresWork + " : "+(index+1)}</h1>
-                </div>
-              )
-            })}
-          </div>
-      </div>
-    </div>
-  )
-}
+    <SlideSidebar
+      filter={props.filter}
+      activeIndex={props.indexFilterShow ?? 0}
+      onSelect={props.setIndexFilterShow}
+    />
+  );
+};
 
-export default Paperpre
+export default Paperpre;

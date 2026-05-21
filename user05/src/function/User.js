@@ -1,153 +1,178 @@
-import React from 'react'
-import '../CSS/style.css'
-import Multipleuser from '../Features/Multipleuser'
-import Openenduser from '../Features/Openenduser'
-import Rankinguser from '../Features/Rankinguser'
-import Wordclouduser from '../Features/Wordclouduser'
-import serviceApi from '../firebase/serviceApi'
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
+import React, { useState, useEffect } from 'react';
+import Multipleuser from '../Features/Multipleuser';
+import Openenduser from '../Features/Openenduser';
+import Rankinguser from '../Features/Rankinguser';
+import Wordclouduser from '../Features/Wordclouduser';
+import serviceApi from '../firebase/serviceApi';
+import { useParams } from 'react-router-dom';
+import { collection, doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase/firebase';
+import { AppButton, AppCard, AppEmptyState, AppErrorState, AppInput, AppLoader } from '../design-system';
+import { formMaxWidth } from '../design-system/tokens/spacing';
+import { ParticipantLayout } from '../layout';
+import { countParticipantSteps, participantStepIndex } from '../layout/participantProgress';
 
-import { useState,useEffect} from 'react'
-import { db } from "../firebase/firebase";
-import { useParams } from 'react-router-dom'
-const User = (props) => {
+const User = () => {
+  const { docId } = useParams();
+  const [filter, setFilter] = useState([]);
+  const [indexFilterShow, setIndexFilterShow] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+  const [user, setUser] = useState('');
+  const [checkUser, setCheckUser] = useState(false);
+  const [userError, setUserError] = useState('');
+  const docRef = doc(db, 'Form', docId);
+  const [answerUser, setanswerUser] = useState([]);
 
+  useEffect(() => {
+    setLoading(true);
+    setFetchError(null);
+    serviceApi.getPaper(
+      docId,
+      (workdata) => {
+        setFilter(workdata.filter ?? []);
+        setLoading(false);
+      },
+      () => {
+        setFetchError('This session is unavailable. Check the link or ask your instructor.');
+        setLoading(false);
+      }
+    );
+  }, [docId]);
 
-    const {docId} = useParams()
-    const [filter,setFilter] = useState([])
-    const [indexFilterShow,setIndexFilterShow] = useState(0)
-    const [loading,setLoading] = useState(true)
-    const [user,setUser] = useState('')
-    const [checkUser,setCheckUser] = useState(false)
-    
-    let docRef = db.collection("Form").doc(docId);
-    const [answerUser,setanswerUser] = useState([])
+  useEffect(() => {
+    const unsub = onSnapshot(
+      collection(docRef, 'answers'),
+      (querySnapshot) => {
+        const x = [];
+        querySnapshot.forEach((d) => {
+          const y = x.findIndex((data) => data.answer === d.data().answer);
+          if (y === -1) {
+            x.push({
+              user: d.data().user,
+              answer: d.data().answer,
+              count: 1,
+              index: d.data().index,
+              status: d.data().status,
+            });
+          } else {
+            x[y].count += 1;
+          }
+        });
+        setanswerUser([...x]);
+      },
+      (error) => console.error('Error getting documents: ', error)
+    );
+    return unsub;
+  }, [docId]);
 
-    useEffect (() => {
-        serviceApi.getPaper(docId,getSuccess);
-      }, []);
-    
-
-    const getSuccess = (workdata)=> {
-    console.log("workdata",workdata);   
-    setFilter(workdata.filter)
-    setLoading(false)
+  useEffect(() => {
+    if (filter[indexFilterShow]?.featuresWork === 'QRcode') {
+      setIndexFilterShow((i) => i + 1);
     }
-    
-    useEffect (()=>{
-      docRef.collection("answers")
-      .onSnapshot((querySnapshot) => {
-          let x = []
-          querySnapshot.forEach((doc) => {
-              // if (doc.data().index == props.indexFilterShow){
-                  let y =  x.findIndex((data) => data.answer == doc.data().answer)
-                  if(y==-1){
-                      x.push ({
-                          user:doc.data ().user,
-                          answer:doc.data ().answer,
-                          count : 1,
-                          index:doc.data().index,
-                          status:doc.data().status,
-                      })
-                  }
-                  else {
-                      x[y].count+=1
-                  }
-              // }
-              // console.log(doc.id, " => ", doc.data());
+  }, [indexFilterShow, filter]);
 
-          });
-          console.log("X",x);
-          setanswerUser ([...x])
-          setLoading(false)
-      }, (error) => {
-          console.log("Error getting documents: ", error);
-      });
-  },[])
+  const totalSteps = countParticipantSteps(filter);
+  const step = participantStepIndex(filter, indexFilterShow);
 
-
-console.log("User",indexFilterShow)
-if(loading){
-  return(
-    <h1>loading</h1>
-  )
-}
-
-  if(filter.length === 0){
-    return(
-      <h1>{docId}</h1>
-    )
+  if (loading) {
+    return <AppLoader message="Loading session..." fullScreen />;
   }
-  if(!checkUser){
-    return(
-        <div class="row" style={{padding:40}}> 
-            <h1 style={{fontFamily:"serif"}}>Hello</h1>
-            <h3 style={{fontFamily:"serif"}}>Please enter your name or student code.</h3>
-            <TextField
-            id="outlined-basic"
+
+  if (fetchError) {
+    return (
+      <AppErrorState
+        title="Session unavailable"
+        message={fetchError}
+        onRetry={() => window.location.reload()}
+        retryLabel="Reload"
+      />
+    );
+  }
+
+  if (filter.length === 0) {
+    return (
+      <ParticipantLayout>
+        <AppEmptyState title="Session not ready" description="This presentation has no slides yet." />
+      </ParticipantLayout>
+    );
+  }
+
+  if (!checkUser) {
+    const handleSubmitUser = () => {
+      if (!user.trim()) {
+        setUserError('Please enter your name or student code.');
+        return;
+      }
+      setUserError('');
+      setCheckUser(true);
+    };
+    return (
+      <ParticipantLayout>
+        <AppCard
+          title="Join session"
+          subtitle="Enter your name or student code to participate."
+          maxWidth={formMaxWidth.lg}
+          padding="md"
+        >
+          <AppInput
+            id="participant-id"
             label="Your ID"
-            margin="normal"
-            variant="outlined"
-            onChange={(e)=>setUser(e.target.value)}
-            inputProps={{style: {fontSize: 16}}}
-            InputLabelProps={{style: {fontSize: 14}}} 
-        />
-            <Button  variant="contained" onClick={()=>setCheckUser(true)} >Submit</Button>
-        </div>
-    )
-   
+            value={user}
+            onChange={(e) => setUser(e.target.value)}
+            error={Boolean(userError)}
+            helperText={userError}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleSubmitUser())}
+          />
+          <AppButton variant="contained" onClick={handleSubmitUser} sx={{ mt: 2 }} fullWidth>
+            Continue
+          </AppButton>
+        </AppCard>
+      </ParticipantLayout>
+    );
   }
- console.log("name",props.user)
-if (indexFilterShow === filter.length) {
-    return(
-    <div class="head" style={{marginTop:80}}>
-        <h1>Thank You</h1>
-    </div>
-)  
-}
 
-  if (filter[indexFilterShow].featuresWork  === "rank") {
+  if (indexFilterShow === filter.length) {
+    return (
+      <ParticipantLayout>
+        <AppCard title="Thank you" subtitle="Your responses have been recorded." padding="md" />
+      </ParticipantLayout>
+    );
+  }
 
-    return (
-        <div className="content-container1"> 
-          <Rankinguser data={filter[indexFilterShow]} indexFilterShow={indexFilterShow} setIndexFilterShow={setIndexFilterShow} docId={docId} user={user} answerUser={answerUser}/>
-        </div>
-    )
-  }
-  else if (filter[indexFilterShow].featuresWork === "open") {
-    return (
-      <div className="content-container1">
-        <Openenduser  data={filter[indexFilterShow]} indexFilterShow={indexFilterShow} setIndexFilterShow={setIndexFilterShow} docId={docId} user={user} answerUser={answerUser}/>
-      </div>
-    )
-  }
-  else if (filter[indexFilterShow].featuresWork  === "word") {
-    return (
-      <div className="content-container1">
-        <Wordclouduser data={filter[indexFilterShow]} indexFilterShow={indexFilterShow} setIndexFilterShow={setIndexFilterShow} docId={docId} user={user} answerUser={answerUser}/>
-      </div>
-    )
-  }
-  else if (filter[indexFilterShow].featuresWork  === "multiple") {
-    return (
-      <div className="content-container1">
-        <Multipleuser data={filter[indexFilterShow]} indexFilterShow={indexFilterShow} setIndexFilterShow={setIndexFilterShow} docId={docId} user={user} answerUser={answerUser}/>
-        
-      </div>
-    )
-  }
-  else if (filter[indexFilterShow].featuresWork === "QRcode") {
-    {setIndexFilterShow(indexFilterShow+1)}
-    }
+  const slide = filter[indexFilterShow];
+  const shared = {
+    data: slide,
+    indexFilterShow,
+    setIndexFilterShow,
+    docId,
+    user,
+    answerUser,
+    step,
+    totalSlides: totalSteps,
+  };
 
-  
-
+  if (slide.featuresWork === 'rank') {
+    return <Rankinguser {...shared} />;
+  }
+  if (slide.featuresWork === 'open') {
+    return <Openenduser {...shared} />;
+  }
+  if (slide.featuresWork === 'word') {
+    return <Wordclouduser {...shared} />;
+  }
+  if (slide.featuresWork === 'multiple') {
+    return <Multipleuser {...shared} />;
+  }
+  if (slide.featuresWork === 'QRcode') {
+    return <AppLoader message="Loading next slide..." fullScreen />;
+  }
 
   return (
-    <div className="content-container1">error</div>
-  )
-}
+    <ParticipantLayout>
+      <AppEmptyState title="Unknown slide type" />
+    </ParticipantLayout>
+  );
+};
 
-export default User
-  
+export default User;

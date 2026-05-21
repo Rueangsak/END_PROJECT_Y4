@@ -52,7 +52,7 @@ export const Navigation = (props) => {
             </li>
             
             <li>
-              <Link to={'/Login'}>
+              <Link to="/login">
                 <p className='page-scroll'>
                   login
                 </p>
