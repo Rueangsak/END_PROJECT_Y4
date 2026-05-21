@@ -5,7 +5,6 @@ import QR from './QR'
 import Chip from '@mui/material/Chip';
 import serviceApi from '../firebase/serviceApi';
 import { useState,useEffect} from 'react'
-import { db } from "../firebase/firebase";
 import { useParams } from 'react-router-dom'
 import WordCloud from 'react-wordcloud';
 import { Bar } from "react-chartjs-2";
@@ -19,7 +18,6 @@ const Bigpaper = (props) => {
 
   const {docId} = useParams()
   const [filter,setFilter] = useState([])
-  let docRef = db.collection("Form").doc(docId);
   const [answerUser,setanswerUser] = useState([])
 
   

@@ -1,9 +1,9 @@
 import Chip from '@mui/material/Chip';
 import * as React from 'react';
-import "firebase/firestore";
 import { useParams } from 'react-router-dom';
 import { useState,useEffect } from 'react';
 import { db } from "../firebase/firebase";
+import { collection, doc, getDocs } from 'firebase/firestore';
 import FormLabel from '@mui/material/FormLabel';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -15,8 +15,6 @@ import { Chart as ChartJS } from "chart.js/auto";
 
 
 import { Link } from "react-router-dom"
-import firebase from "firebase";
-
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import '../CSS/style.css';
@@ -35,7 +33,7 @@ export default function RankingShow(props) {
     
     
     
-    let docRef = db.collection("Form").doc(docId);
+    const docRef = doc(db, "Form", docId);
     const [userData, setUserData] = useState({
         labels: name.map((data) => data.answer),
         datasets: [
@@ -60,10 +58,7 @@ export default function RankingShow(props) {
 
 
     useEffect (()=>{
-        docRef.collection('answers').get(
-       
-            
-        )
+        getDocs(collection(docRef, "answers"))
         .then((querySnapshot) => {
             let x = []
             querySnapshot.forEach((doc) => {

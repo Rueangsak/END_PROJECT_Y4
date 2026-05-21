@@ -7,6 +7,7 @@ import Content from '../c-presen/content'
 import '../CSS/open.css'
 import '../CSS/navbar2.css'
 import { db } from "../firebase/firebase";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { useParams } from 'react-router-dom'
 
 import Box from '@mui/material/Box';
@@ -18,9 +19,6 @@ import { Link } from "react-router-dom"
 
 import QRCode from 'qrcode';
 import serviceApi from '../firebase/serviceApi'
-
-
-import { useHistory } from 'react-router-dom';
 
 
 const style = {
@@ -97,11 +95,10 @@ const Open = (props) => {
   
   //ลบคำตอบทั้งหมด
   const handleDeleteCollection = () => {
-    db.collection("Form").doc(docId).collection("answers")
-      .get()
+    getDocs(collection(doc(db, "Form", docId), "answers"))
       .then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-          doc.ref.delete();
+          deleteDoc(doc.ref);
         });
       })
       .then(() => {

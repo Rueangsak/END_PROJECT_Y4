@@ -11,6 +11,7 @@ import Button from '@mui/material/Button';
 import { useState,useEffect} from 'react'
 import { db } from "../firebase/firebase";
 import { useParams } from 'react-router-dom'
+import { collection, doc, onSnapshot } from 'firebase/firestore';
 const User = (props) => {
 
 
@@ -21,7 +22,7 @@ const User = (props) => {
     const [user,setUser] = useState('')
     const [checkUser,setCheckUser] = useState(false)
     
-    let docRef = db.collection("Form").doc(docId);
+    const docRef = doc(db, "Form", docId);
     const [answerUser,setanswerUser] = useState([])
 
     useEffect (() => {
@@ -36,8 +37,7 @@ const User = (props) => {
     }
     
     useEffect (()=>{
-      docRef.collection("answers")
-      .onSnapshot((querySnapshot) => {
+      onSnapshot(collection(docRef, "answers"), (querySnapshot) => {
           let x = []
           querySnapshot.forEach((doc) => {
               // if (doc.data().index == props.indexFilterShow){

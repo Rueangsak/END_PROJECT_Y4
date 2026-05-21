@@ -1,8 +1,8 @@
 import * as React from 'react';
-import "firebase/firestore";
 import { useParams } from 'react-router-dom';
 import { useState,useEffect } from 'react';
 import { db,auth } from "../firebase/firebase";
+import { addDoc, collection, doc } from 'firebase/firestore';
 import FormLabel from '@mui/material/FormLabel';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -22,10 +22,10 @@ import WordCloud from 'react-wordcloud';
 export default function WordcloudShow(props) {
 
     const [answer,setAnswer] = useState('')
-    let docRef = db.collection("Form").doc(props.docId);
+    const docRef = doc(db, "Form", props.docId);
    
     const handleAddAnswer = () => {
-        docRef.collection('answers').add({
+        addDoc(collection(docRef, "answers"), {
             answer: answer, 
             user : props.user,
             index : props.indexFilterShow

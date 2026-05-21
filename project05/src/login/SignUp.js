@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { db,auth } from '../firebase/firebase'
 import { Navigate } from "react-router-dom";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 
 // import { Redirect } from 'react-router-dom'
 
@@ -11,11 +13,11 @@ const SignUp = () => {
         e.preventDefault();
         const { email, password ,name} = e.target.elements;
         try {
-            auth.createUserWithEmailAndPassword(email.value, password.value)
+            createUserWithEmailAndPassword(auth, email.value, password.value)
             .then((userCredential) => {
                 var user = userCredential.user;
                 console.log(userCredential);
-                db.collection("email").doc(auth.currentUser.uid).set({
+                setDoc(doc(db, "email", auth.currentUser.uid), {
                     email: email.value,
                     name: name.value, 
                     uid: auth.currentUser.uid,

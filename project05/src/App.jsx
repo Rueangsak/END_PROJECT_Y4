@@ -1,5 +1,5 @@
 
-import { Routes,Route,BrowserRouter,Link, Navigate ,Redirect  } from "react-router-dom";
+import { Routes,Route,BrowserRouter } from "react-router-dom";
 import Work from "./pages/Work";
 import Open from "./pages/Open";
 import Main from "./pages/Main";
@@ -21,10 +21,10 @@ const App = () => {
       <AuthProvider>
         <BrowserRouter>
             <Routes>
-              <Route path="/" element={< Main />} />
-              <Route path="/Login" element={< LogIn />} />
+              <Route path="/" element={<Main />} />
+              <Route path="/Login" element={<LogIn />} />
               <Route path="/Logout" element={<Logout/>}/>
-              <Route path="/SignUp" element={< SignUp />} />
+              <Route path="/SignUp" element={<SignUp />} />
               <Route path="/Work" element={<Work />} />
               <Route path="/Open/:docId" element={<Open />} />
               <Route path="/Show/:docId" element={<Show />} />

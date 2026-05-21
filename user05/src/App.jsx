@@ -20,12 +20,12 @@ const App = () => {
       
         <BrowserRouter>
             <Routes>
-              <Route path="User/:docId" element={< User />} />
-              <Route path="Open/:docId" element={< Open />} />
-              <Route path="/OpenendShow/:docId/:index" element={< OpenendShow />} />
-              <Route path="/RankingShow/:docId/:index" element={< RankingShow />} />
-              <Route path="/WordcloudShow/:docId/:index" element={< WordcloudShow />} />
-              <Route path="/MultipleShow/:docId/:index" element={< MultipleShow />} />
+              <Route path="User/:docId" element={<User />} />
+              <Route path="Open/:docId" element={<Open />} />
+              <Route path="/OpenendShow/:docId/:index" element={<OpenendShow />} />
+              <Route path="/RankingShow/:docId/:index" element={<RankingShow />} />
+              <Route path="/WordcloudShow/:docId/:index" element={<WordcloudShow />} />
+              <Route path="/MultipleShow/:docId/:index" element={<MultipleShow />} />
             </Routes>
         </BrowserRouter>
       

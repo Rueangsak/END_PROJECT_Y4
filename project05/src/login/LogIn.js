@@ -2,6 +2,7 @@ import React, { useContext } from 'react'
 import { AuthContext } from './Auth'
 import {auth} from '../firebase/firebase'
 import { Navigate, Link } from "react-router-dom";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 // import { Redirect } from 'react-router-dom'
 const LogIn = () => {
 
@@ -12,7 +13,7 @@ const LogIn = () => {
 
         try {
 
-            auth.signInWithEmailAndPassword(email.value, password.value)
+            signInWithEmailAndPassword(auth, email.value, password.value)
             .then((data)=>{
                 console.log(data);
             }).catch((error)=>{
@@ -59,8 +60,7 @@ const LogIn = () => {
 }
 export const logout = () => async dispatch => {
     try {
-      const firebase = require('firebase'); // eslint-disable-line global-require
-      await firebase.auth().signOut();
+      await signOut(auth);
       console.log('User Logged Out!');
     //   dispatch({ type: LOGOUT_SUCCESS });
     } catch (err) {

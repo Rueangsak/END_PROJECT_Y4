@@ -1,7 +1,15 @@
 import { db } from "./firebase";
+import {
+    addDoc,
+    collection,
+    doc,
+    getDoc,
+    onSnapshot,
+    updateDoc,
+} from "firebase/firestore";
 
 const addFormToDB=(uid,nameWork)=>{
-    db.collection("Form").add({
+    addDoc(collection(db, "Form"), {
         uid:uid,
         nameWork:nameWork,
         filter:[
@@ -30,8 +38,7 @@ const addFormToDB=(uid,nameWork)=>{
 }
 
 const getForm= (success)=>{
-    db.collection("Form")
-        .onSnapshot((querySnapshot) => {
+    onSnapshot(collection(db, "Form"), (querySnapshot) => {
         let forms = [];
         querySnapshot.forEach((doc) => {
             forms.push({...doc.data(),id:doc.id});
@@ -42,12 +49,12 @@ const getForm= (success)=>{
 
 
 const getPaper = (docid,getSuccess)=>{
-    let docRef = db.collection("Form").doc(docid);
+    const docRef = doc(db, "Form", docid);
 
-    docRef.get().then((docid) => {
-        if (docid.exists) {
-            console.log("Document data:", docid.data());
-            getSuccess(docid.data())
+    getDoc(docRef).then((docSnap) => {
+        if (docSnap.exists()) {
+            console.log("Document data:", docSnap.data());
+            getSuccess(docSnap.data())
         } else {
             console.log("No such document!");
         }
@@ -62,7 +69,7 @@ const getPaper = (docid,getSuccess)=>{
 
 const updatePaper = (docid,filter,saveSuccess) => {
     
-        db.collection('Form').doc(docid).update({ 
+        updateDoc(doc(db, "Form", docid), { 
             filter: filter 
         })
         .then(() => {

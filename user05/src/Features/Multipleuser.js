@@ -1,8 +1,8 @@
 import { Button} from '@mui/material';
-import "firebase/firestore";
 import { useParams } from 'react-router-dom';
 import { useState,useEffect } from 'react';
 import { db } from "../firebase/firebase";
+import { addDoc, collection, doc } from 'firebase/firestore';
 import '../CSS/style.css';
 
 
@@ -58,10 +58,10 @@ export default function Multipleuser(props) {
 
 
 
-    let docRef = db.collection("Form").doc(docId);
+    const docRef = doc(db, "Form", docId);
     
     const handleAddAnswer = () => {
-      docRef.collection('answers').add({
+      addDoc(collection(docRef, "answers"), {
           answer: answer, 
           user : props.user,
           index : props.indexFilterShow,

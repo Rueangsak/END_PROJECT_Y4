@@ -1,10 +1,10 @@
 import * as React from 'react';
-import "firebase/firestore";
 import FormLabel from '@mui/material/FormLabel';
 import Box from '@mui/material/Box';
 import '../CSS/style.css';
 import Chip from '@mui/material/Chip';
 import { db } from "../firebase/firebase";
+import { addDoc, collection, doc } from 'firebase/firestore';
 import { useParams } from 'react-router-dom';
 import {Button,TextField} from '@mui/material';
 import { useState,useEffect } from 'react';
@@ -17,10 +17,10 @@ export default function Openenduser(props) {
     const [loading,setLoading] = useState(true)
     const {docId,index} = useParams()
     const [check,setCheck] = useState(true)
-    let docRef = db.collection("Form").doc(props.docId); 
+    const docRef = doc(db, "Form", props.docId); 
 
     const handleAddAnswer = () => {
-        docRef.collection('answers').add({
+        addDoc(collection(docRef, "answers"), {
             answer: answer, 
             user : props.user,
             index : props.indexFilterShow

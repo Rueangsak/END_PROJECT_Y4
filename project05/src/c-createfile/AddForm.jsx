@@ -9,6 +9,7 @@ import DialogActions from '@mui/material/DialogActions';
 import serviceApi from '../firebase/serviceApi';
 import { db,auth } from '../firebase/firebase';
 import { useParams } from 'react-router-dom';
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 
 
 
@@ -32,7 +33,7 @@ const AddTodoForm = ({ todo, onAddFormSubmit, onAddInputChange }) => {
   
   const handleUpdate = () => {
     
-    db.collection('Form').doc(selectedForm.id).update({ nameWork: newValue });
+    updateDoc(doc(db, "Form", selectedForm.id), { nameWork: newValue });
     handleDialogClose();
   };
   
@@ -47,9 +48,7 @@ const AddTodoForm = ({ todo, onAddFormSubmit, onAddInputChange }) => {
   //delete form
   const deleteform = (form) => {
     if (window.confirm("Do you want to delete?")) {
-      db.collection("Form")
-        .doc(form.id)
-        .delete()
+      deleteDoc(doc(db, "Form", form.id))
         .then(() => {
           console.log("The data was successfully deleted.");
         })

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import {auth} from '../firebase/firebase'
+import { onAuthStateChanged } from "firebase/auth";
 
 
 //เอาไว้ตรวจว่า user มีการ Onsensation หรือไม่
@@ -10,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
-        auth.onAuthStateChanged((user) => {
+        onAuthStateChanged(auth, (user) => {
             setCurrentUser(user);
             setLoading(false);
         })

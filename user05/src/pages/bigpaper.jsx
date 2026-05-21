@@ -6,6 +6,7 @@ import {Button,TextField} from '@mui/material';
 import Chip from '@mui/material/Chip';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebase/firebase';
+import { collection, doc, onSnapshot } from 'firebase/firestore';
 import OpenendShow from '../show/OpenendShow';
 import RankingShow from '../show/RankingShowww';
 import WordcloudShow from '../show/WordcloudShow';
@@ -21,7 +22,7 @@ const Bigpaper = (props) => {
   const {docId} = useParams()
 const [user,setUser] = useState('')
 const [answerUser,setanswerUser] = useState([])
-let docRef = db.collection("Form").doc(docId);
+const docRef = doc(db, "Form", docId);
 
 
 
@@ -32,8 +33,7 @@ let docRef = db.collection("Form").doc(docId);
 
 
 useEffect (()=>{
-  docRef.collection("answers")
-  .onSnapshot((querySnapshot) => {
+  onSnapshot(collection(docRef, "answers"), (querySnapshot) => {
       let x = []
       querySnapshot.forEach((doc) => {
           // if (doc.data().index == props.indexFilterShow){
