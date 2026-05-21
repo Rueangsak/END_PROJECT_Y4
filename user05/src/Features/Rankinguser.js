@@ -1,152 +1,106 @@
-// import Box from '@mui/material/Box';
-// import FormControl from '@mui/material/FormControl';
-// import FormGroup from '@mui/material/FormGroup';
-// import FormControlLabel from '@mui/material/FormControlLabel';
-// import FormHelperText from '@mui/material/FormHelperText';
-// import Checkbox from '@mui/material/Checkbox';
-// import Button from '@mui/material/Button';
-// import TextField from '@mui/material/TextField';
-// import firebase from "firebase/app";
-
-import { Bar } from "react-chartjs-2";
+import { Bar } from 'react-chartjs-2';
 import { useParams } from 'react-router-dom';
-import { useState,useEffect } from 'react';
-import { db } from "../firebase/firebase";
+import { useState } from 'react';
+import { db } from '../firebase/firebase';
 import { addDoc, collection, doc } from 'firebase/firestore';
-import '../CSS/style.css';
-import TextField from '@mui/material/TextField';
-
-
-import { Button} from '@mui/material';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormLabel from '@mui/material/FormLabel';
-import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
+import Radio from '@mui/material/Radio';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import RadioGroup from '@mui/material/RadioGroup';
+import { AppButton } from '../design-system';
+import { ChartPanel, ParticipantQuestion } from '../layout';
 
-export default function Multipleuser(props) {
-    const {docId,index} = useParams()
-    const [data,setData] = useState(null)
-    const [ans,setAns] = useState([]);
-    const [check,setCheck] = useState(true)
-    const [user,setUser] = useState('')
-    const [loading,setLoading] = useState(true)
-    const [answer, setAnswer] = useState('');
-    const [message, setMessage] = useState('');
-    const [score, setScore] = useState(0);    
-    const [name,setName] = useState([])
+export default function Rankinguser(props) {
+  const { docId } = useParams();
+  const [check, setCheck] = useState(true);
+  const [answer, setAnswer] = useState('');
+  const docRef = doc(db, 'Form', docId);
+  const step = props.step ?? props.indexFilterShow + 1;
+  const total = props.totalSlides ?? 1;
 
-    const docRef = doc(db, "Form", docId);
+  const handleAddAnswer = () => {
+    if (!answer) return;
+    addDoc(collection(docRef, 'answers'), {
+      answer,
+      user: props.user,
+      index: props.indexFilterShow,
+    })
+      .then(() => {
+        setCheck(false);
+        setAnswer('');
+      })
+      .catch((error) => console.error('Error adding answer: ', error));
+  };
 
-    const handleAddAnswer = () => {
-        addDoc(collection(docRef, "answers"), {
-            answer: answer, 
-            user : props.user,
-            index : props.indexFilterShow
-        })
-        .then(() => {
-            alert("Answer successfully added!");
-            console.log("Answer successfully added!");
-            setCheck (false)
-            setAnswer(''); // Clear the input field
-        })
-        .catch((error) => {
-            console.error("Error adding answer: ", error);
-        });
-    };
-      
+  const filteredAnswers = props.answerUser.filter((data) => data.index === props.indexFilterShow);
+  const chartData = {
+    labels: filteredAnswers.map((data) => data.answer),
+    datasets: [
+      {
+        label: 'Votes',
+        data: filteredAnswers.map((data) => data.count),
+        backgroundColor: ['#0B57D0', '#4F46E5', '#15803D', '#B45309', '#64748B'],
+        borderWidth: 0,
+      },
+    ],
+  };
 
-  
-    
-    
+  if (check) {
+    const options = props.data.ans?.length
+      ? props.data.ans
+      : props.answerUser.filter((data) => data.index === props.indexFilterShow);
 
-    const [userData, setUserData] = useState({
-        labels: props.answerUser.map((data) => data.answer),
-        datasets: [
-          {
-            label: "Ranking",
-            data: props.answerUser.map((data) => data.count),
-            backgroundColor: [
-              "rgba(75,192,192,1)",
-              "#ecf0f1",
-              "#50AF95",
-              "#f3ba2f",
-              "#2a71d0",
-            ],
-            borderColor: "black",
-            borderWidth: 2,
-          },
-        ],
-      });
-      function BarChart({ chartData }) {
-        return <Bar data={chartData} />;
+    return (
+      <ParticipantQuestion
+        question={props.data.question}
+        step={step}
+        totalSteps={total}
+        primaryLabel="Submit answer"
+        onPrimary={handleAddAnswer}
+        primaryDisabled={!answer}
+      >
+        <RadioGroup value={answer} onChange={(e) => setAnswer(e.target.value)} name="ranking-options">
+          <Stack spacing={1}>
+            {(options.length ? options : [{ text: 'No options yet' }]).map((option, index) => (
+              <FormControlLabel
+                key={index}
+                value={option.text || option.answer || ''}
+                control={<Radio />}
+                label={option.text || option.answer || 'Option'}
+                disabled={!option.text && !option.answer}
+              />
+            ))}
+          </Stack>
+        </RadioGroup>
+      </ParticipantQuestion>
+    );
+  }
+
+  return (
+    <ParticipantQuestion
+      question={props.data.question}
+      step={step}
+      totalSteps={total}
+      primaryAction={
+        <AppButton
+          variant="contained"
+          fullWidth
+          onClick={() => {
+            props.setIndexFilterShow(props.indexFilterShow + 1);
+            setCheck(true);
+          }}
+        >
+          Next question
+        </AppButton>
       }
-
-
-    // useEffect (()=>{
-    //         setUserData ({
-    //             labels: props.answerUser.map((data) => data.answer),
-    //             datasets: [
-    //               {
-    //                 label: "Ranking",
-    //                 fontFamily:"Serif",
-    //                 data: x.map((data) => data.count),
-    //                 backgroundColor: [
-    //                   "rgba(75,192,192,1)",
-    //                   "#ecf0f1",
-    //                   "#50AF95",
-    //                   "#f3ba2f",
-    //                   "#2a71d0",  
-    //                 ],
-    //                 borderColor: "black",
-    //                 borderWidth: 2,
-    //               },
-    //             ],
-    //           })
-    //     })
-    //     .catch((error) => {
-    //         console.log("Error getting documents: ", error);
-    //     });
-        
-    //   },[])
-    
-
-
-
-
-if (check){
-        return (
-            
-            
-            <div class="row"  >
-            <h2>{props.data.question}</h2>
-            <form style={{padding:10}}>
-              {props.answerUser.filter((data)=>data.index == props.indexFilterShow).map((option, index) => (
-                <div key={index} style={{padding:5}}>
-                  <input onClick={()=> setAnswer(option.text)} type="radio" id={`data${index}`} name="option" value={option.text} />
-                  <label htmlFor={`option${index}`}>{option.text}</label>
-                </div>
-              ))}<br></br>
-              <Button  variant="contained" onClick={handleAddAnswer}>Send</Button>
-            </form>
-            <br></br><br></br>
-          </div>  
-        )
+    >
+      <ChartPanel
+        title="Live results"
+        subtitle="How the class voted so far"
+        empty={filteredAnswers.length === 0 ? 'Waiting for responses' : undefined}
+      >
+        <Bar data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
+      </ChartPanel>
+    </ParticipantQuestion>
+  );
 }
-return(
-    <div className="row">
-      <div style={{ width: 700 }}>
-        <BarChart chartData={userData} />
-      </div>
-    <Button  style={{marginTop:40}} variant="contained" onClick={() => [props.setIndexFilterShow(props.indexFilterShow+1),check(true)]}>Send</Button> 
-  </div>
-)
-    
-}
-
-    
-
-
-
-
-

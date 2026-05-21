@@ -10,11 +10,11 @@ It consumes form data created in `project05`, allows users to answer questions v
 - Serve question flow by slide type (`rank`, `open`, `word`, `multiple`).
 - Submit answers to Firestore subcollection `answers`.
 - Display live results on `/Open/:docId`.
-- Provide dedicated show routes per mode (`/OpenendShow`, `/RankingShow`, `/WordcloudShow`, `/MultipleShow`).
+- Legacy share routes (`/OpenendShow`, etc.) load a single slide via `ShowSlidePage` + live Firestore data.
 
 ## Main Routes
 
-Defined in `src/App.js`:
+Defined in `src/App.jsx`:
 
 - `User/:docId` - participant answering flow
 - `Open/:docId` - live presentation/result page
@@ -54,6 +54,14 @@ Firebase project: `teaching-project-a8687`
 - `src/show/*.js` - result display components by type
 - `src/firebase/serviceApi.js` - Firestore API helpers
 - `src/firebase/firebase.js` - Firebase initialization
+
+## Firestore Security Rules
+
+Shared with `project05` — see `../firestore.rules` and deploy:
+
+```bash
+firebase deploy --only firestore:rules
+```
 
 ## Local Development
 
