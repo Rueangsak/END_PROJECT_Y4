@@ -22,7 +22,7 @@ const App = () => (
           <Route path="/Logout" element={<Logout />} />
           <Route path="/SignUp" element={<SignUp />} />
           <Route
-            path="/Work"
+            path="/work"
             element={
               <RequireAuth>
                 <Work />

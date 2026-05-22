@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { CssBaseline, ThemeProvider } from '@mui/material';
+import CssBaseline from '@mui/material/CssBaseline';
+import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import AppFeedbackProvider from '../feedback/AppFeedbackProvider';
 import { createAppTheme } from './createAppTheme';
 

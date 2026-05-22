@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { AppLoader } from '../design-system';
+import AppLoader from '../design-system/primitives/AppLoader';
 import { auth } from '../firebase/firebase';
 
 

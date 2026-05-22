@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { AppLoader } from '../design-system';
+import AppLoader from '../design-system/primitives/AppLoader';
 import { auth } from '../firebase/firebase';
 
 const Logout = () => {
