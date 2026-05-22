@@ -35,13 +35,13 @@ const Show = () => {
   }, [docId]);
 
   if (loading) {
-    return <PageLoading message="Loading live view..." />;
+    return <PageLoading message="Loading live results..." />;
   }
 
   if (fetchError || liveError) {
     return (
       <AppErrorState
-        title="Live view unavailable"
+        title="Could not open live results"
         message={fetchError || liveError}
         onRetry={() => navigate(`/Open/${docId}`)}
         retryLabel="Back to editor"

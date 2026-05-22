@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/global.css';
 import App from './App';
-import { AppThemeProvider } from './design-system';
+import AppThemeProvider from './design-system/theme/AppThemeProvider';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

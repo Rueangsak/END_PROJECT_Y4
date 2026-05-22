@@ -120,10 +120,10 @@ const Open = () => {
   if (fetchError || liveError) {
     return (
       <AppErrorState
-        title="Presentation unavailable"
+        title="Could not load presentation"
         message={fetchError || liveError}
         onRetry={() => window.location.reload()}
-        retryLabel="Reload"
+        retryLabel="Try again"
       />
     );
   }

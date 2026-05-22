@@ -9,6 +9,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { AppButton, AppCard, AppInput, FadeIn } from '../design-system';
 import { formMaxWidth, layoutSpacing } from '../design-system/tokens/spacing';
 import { auth, db } from '../firebase/firebase';
+import AuthLayout from '../layout/AuthLayout';
 import { AuthContext } from './Auth';
 
 const SignUp = () => {
@@ -35,20 +36,18 @@ const SignUp = () => {
   };
 
   if (currentUser) {
-    return <Navigate to="/Work" replace />;
+    return <Navigate to="/work" replace />;
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        px: layoutSpacing.pageX,
-        py: { xs: 4, md: 8 },
-      }}
-    >
+    <AuthLayout>
       <FadeIn>
-        <AppCard title="Sign Up" maxWidth={formMaxWidth.lg} padding="md">
+        <AppCard
+          title="Create account"
+          subtitle="Create an account to start building presentations"
+          maxWidth={formMaxWidth.lg}
+          padding="md"
+        >
           <Box component="form" onSubmit={handleSubmit} noValidate>
             <Stack spacing={layoutSpacing.form}>
               <Collapse in={Boolean(errorMessage)}>
@@ -57,7 +56,7 @@ const SignUp = () => {
               <AppInput
                 id="signup-email"
                 name="email"
-                label="Email address"
+                label="Email"
                 type="email"
                 required
                 autoComplete="email"
@@ -70,12 +69,12 @@ const SignUp = () => {
                 required
                 autoComplete="new-password"
               />
-              <AppInput id="signup-name" name="name" label="Name" type="text" required autoComplete="name" />
+              <AppInput id="signup-name" name="name" label="Full name" type="text" required autoComplete="name" />
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={layoutSpacing.formActions}>
-                <AppButton type="submit" variant="contained" loading={submitting} disabled={submitting}>
+                <AppButton type="submit" variant="contained" loading={submitting} disabled={submitting} fullWidth>
                   Create account
                 </AppButton>
-                <AppButton component={Link} to="/login" variant="outlined">
+                <AppButton component={Link} to="/login" variant="outlined" fullWidth>
                   Sign in
                 </AppButton>
               </Stack>
@@ -83,7 +82,7 @@ const SignUp = () => {
           </Box>
         </AppCard>
       </FadeIn>
-    </Box>
+    </AuthLayout>
   );
 };
 
